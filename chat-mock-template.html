@@ -229,7 +229,7 @@
             <button class="btn-sub" id="applyRectBtn" type="button">应用校准</button>
           </div>
           <label class="check">
-            <input id="showFrameGuide" type="checkbox" checked />
+            <input id="showFrameGuide" type="checkbox" />
             显示覆盖区域边框（用于对齐）
           </label>
         </div>
@@ -263,8 +263,8 @@
       const messages = [
         "和小美聊完了也和小丑聊两句呗",
         "和小美聊完了以后小丑聊两句呗",
-        "刚刚看到你在线，来聊两句吗",
-        "我刚好路过，想和你打个招呼",
+        "和小美聊完了，也和小丑聊两句呗",
+        "和小美聊完了和小丑聊两句呗",
       ];
       const onlineStates = ["在线", "离线"];
 
@@ -489,60 +489,64 @@
         const meta = profile.age ? `${profile.gender}${profile.age}岁   ${profile.city}` : `${profile.gender}   ${profile.city}`;
         const birthdayText = profile.birthday ? `Ta [${profile.birthday}] 过生日~` : "快来和我聊聊天吧～";
 
-        // Clean target regions first to avoid ghosting/overlap on any base screenshot.
+        // 1) Strict text-only replacement regions (no full-card redraw) for pixel stability.
         ctx.fillStyle = NAV_BG;
-        ctx.fillRect(X(18), Y(20), X(95) - X(18), Y(52) - Y(20)); // top-left time
-        ctx.fillRect(X(68), Y(82), X(320) - X(68), Y(168) - Y(82)); // nav title + online status
-        ctx.fillRect(X(94), Y(206), X(350) - X(94), Y(286) - Y(206)); // profile text area
-        ctx.fillStyle = SCREEN_BG;
-        ctx.fillRect(X(184), Y(346), X(292) - X(184), Y(382) - Y(346)); // middle time
-        ctx.fillRect(X(120), Y(414), X(438) - X(120), Y(546) - Y(414)); // message area
+        ctx.fillRect(X(22), Y(20), X(100) - X(22), Y(55) - Y(20)); // status time
+        ctx.fillRect(X(70), Y(84), X(258) - X(70), Y(164) - Y(84)); // title + online line
+        ctx.fillRect(X(98), Y(206), X(344) - X(98), Y(285) - Y(206)); // card text two lines
 
-        ctx.fillStyle = "#0f131b";
-        ctx.font = `600 ${Math.round(20 * sx)}px "PingFang SC", sans-serif`;
+        ctx.fillStyle = SCREEN_BG;
+        ctx.fillRect(X(190), Y(349), X(286) - X(190), Y(381) - Y(349)); // middle time
+
+        // Keep original bubble shape; only rewrite inner text area.
+        ctx.fillStyle = BUBBLE_BG;
+        ctx.fillRect(X(166), Y(440), X(374) - X(166), Y(483) - Y(440));
+
+        // 2) Draw dynamic text.
         ctx.textBaseline = "middle";
-        ctx.fillText(now, X(27), Y(39));
+        ctx.fillStyle = "#0f131b";
+        ctx.font = `600 ${Math.round(22 * S(1))}px "PingFang SC", sans-serif`;
+        ctx.fillText(now, X(28), Y(41));
 
         ctx.fillStyle = "#1b2234";
-        ctx.font = `${Math.round(24 * sx)}px "PingFang SC", sans-serif`;
-        ctx.fillText(title, X(78), Y(106));
+        ctx.font = `600 ${Math.round(24 * S(1))}px "PingFang SC", sans-serif`;
+        ctx.fillText(title, X(80), Y(108));
 
         ctx.beginPath();
         ctx.fillStyle = stateColor;
-        ctx.arc(X(85), Y(151), Math.max(2.5, S(4.6)), 0, Math.PI * 2);
+        ctx.arc(X(84), Y(151), Math.max(2.5, S(4.5)), 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#a5aab7";
-        ctx.font = `${Math.round(14 * sx)}px "PingFang SC", sans-serif`;
+        ctx.font = `${Math.round(14 * S(1))}px "PingFang SC", sans-serif`;
         ctx.fillText(profile.status, X(98), Y(151));
 
         ctx.fillStyle = "#2a2f3e";
-        ctx.font = `600 ${Math.round(16 * sx)}px "PingFang SC", sans-serif`;
-        ctx.fillText(title, X(100), Y(228));
+        ctx.font = `600 ${Math.round(18 * S(1))}px "PingFang SC", sans-serif`;
+        ctx.fillText(title, X(99), Y(228));
         ctx.fillStyle = "#5f6678";
-        ctx.font = `${Math.round(14 * sx)}px "PingFang SC", sans-serif`;
-        ctx.fillText(meta, X(212), Y(229));
+        ctx.font = `${Math.round(15 * S(1))}px "PingFang SC", sans-serif`;
+        ctx.fillText(meta, X(178), Y(228));
 
         ctx.fillStyle = "#7f8798";
-        ctx.font = `${Math.round(13 * sx)}px "PingFang SC", sans-serif`;
-        ctx.fillText(`○ ${birthdayText}`, X(100), Y(273));
+        ctx.font = `${Math.round(13.5 * S(1))}px "PingFang SC", sans-serif`;
+        ctx.fillText(`○ ${birthdayText}`, X(99), Y(273));
 
         ctx.fillStyle = "#acb3c2";
-        ctx.font = `${Math.round(18 * sx)}px "PingFang SC", sans-serif`;
+        ctx.font = `${Math.round(17 * S(1))}px "PingFang SC", sans-serif`;
         ctx.textAlign = "center";
-        ctx.fillText(now, X(236), Y(367));
+        ctx.fillText(now, X(236), Y(366));
         ctx.textAlign = "start";
 
-        ctx.fillStyle = BUBBLE_BG;
-        roundRect(ctx, X(132), Y(430), X(397) - X(132), Y(532) - Y(430), S(14));
-        ctx.fill();
-
         ctx.fillStyle = "#22252e";
-        ctx.font = `500 ${Math.round(22 * sx)}px "PingFang SC", sans-serif`;
-        ctx.textBaseline = "top";
-        const lines = wrapText(ctx, profile.message, X(368) - X(146));
-        lines.slice(0, 2).forEach((line, idx) => {
-          ctx.fillText(line, X(146), Y(446 + idx * 32));
-        });
+        ctx.font = `500 ${Math.round(17 * S(1))}px "PingFang SC", sans-serif`;
+        ctx.textBaseline = "middle";
+        const lines = wrapText(ctx, profile.message, X(372) - X(176));
+        if (lines.length > 1) {
+          ctx.fillText(lines[0], X(176), Y(454));
+          ctx.fillText(lines[1], X(176), Y(476));
+        } else {
+          ctx.fillText(lines[0] || "", X(176), Y(465));
+        }
 
         if (!profile.keepOriginalAvatar) {
           drawRandomAvatar(ctx, X(64), Y(235), S(29));
