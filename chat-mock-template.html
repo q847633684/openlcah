@@ -191,11 +191,11 @@
       <aside class="panel">
         <h1>截图覆盖随机器</h1>
         <p>
-          用你提供的原始截图做底图，只覆盖名字、时间、资料文案和消息气泡。头像按你要求：
-          <strong>50% 保留原图头像，50% 自动随机生成</strong>。
+          当前为<strong>固定原图尺寸模式（473x1024）</strong>：仅覆盖名字、时间、资料文案和消息文案。
+          头像按你要求：<strong>50% 保留原图头像，50% 自动随机生成</strong>。
         </p>
 
-        <div class="block">
+        <div class="block" style="display: none;">
           <label for="baseUpload">1) 上传底图（你发给我的这张截图）</label>
           <input id="baseUpload" type="file" accept="image/*" />
         </div>
@@ -255,6 +255,7 @@
     <script>
       const REF_WIDTH = 473;
       const REF_HEIGHT = 1024;
+      const STRICT_MODE = true;
       const SCREEN_BG = "#edf0f7";
       const NAV_BG = "#ffffff";
       const BUBBLE_BG = "#ffcf2f";
@@ -405,6 +406,17 @@
         return lines;
       }
 
+      function truncateToWidth(ctx, text, maxWidth) {
+        if (ctx.measureText(text).width <= maxWidth) {
+          return text;
+        }
+        let current = text;
+        while (current.length > 0 && ctx.measureText(`${current}…`).width > maxWidth) {
+          current = current.slice(0, -1);
+        }
+        return `${current}…`;
+      }
+
       function drawRandomAvatar(ctx, cx, cy, r) {
         const bgColors = ["#ff79a7", "#ff9f5e", "#5f97ff", "#64c794", "#9f7dff"];
         const faceColors = ["#ffe4ca", "#f8d8b6", "#f2c89d", "#f9dcc4"];
@@ -516,13 +528,17 @@
           return;
         }
         const { showGuide = false } = options;
+        if (STRICT_MODE && (baseImage.width !== REF_WIDTH || baseImage.height !== REF_HEIGHT)) {
+          setStatus(`当前是固定尺寸模式，请上传 ${REF_WIDTH}x${REF_HEIGHT} 的原图。`);
+          return;
+        }
         const ctx = canvas.getContext("2d");
         canvas.width = baseImage.width;
         canvas.height = baseImage.height;
-        const rect = getActiveRect();
-        const sx = rect.w / REF_WIDTH;
-        const sy = rect.h / REF_HEIGHT;
-        const S = (n) => n * Math.min(sx, sy);
+        const rect = STRICT_MODE ? { x: 0, y: 0, w: REF_WIDTH, h: REF_HEIGHT } : getActiveRect();
+        const sx = STRICT_MODE ? 1 : rect.w / REF_WIDTH;
+        const sy = STRICT_MODE ? 1 : rect.h / REF_HEIGHT;
+        const S = (n) => n * (STRICT_MODE ? 1 : Math.min(sx, sy));
         const X = (n) => rect.x + n * sx;
         const Y = (n) => rect.y + n * sy;
 
@@ -537,18 +553,18 @@
 
         // 1) Strict replacement regions.
         ctx.fillStyle = NAV_BG;
-        ctx.fillRect(X(22), Y(20), X(100) - X(22), Y(55) - Y(20)); // status time
-        ctx.fillRect(X(72), Y(82), X(298) - X(72), Y(165) - Y(82)); // title + online line
-        ctx.fillRect(X(97), Y(206), X(356) - X(97), Y(286) - Y(206)); // card text two lines
+        ctx.fillRect(X(20), Y(18), X(106) - X(20), Y(56) - Y(18)); // status time
+        ctx.fillRect(X(70), Y(82), X(276) - X(70), Y(165) - Y(82)); // title + online line
+        ctx.fillRect(X(96), Y(206), X(360) - X(96), Y(286) - Y(206)); // card text two lines
 
         ctx.fillStyle = SCREEN_BG;
-        ctx.fillRect(X(190), Y(349), X(286) - X(190), Y(381) - Y(349)); // middle time
+        ctx.fillRect(X(188), Y(348), X(288) - X(188), Y(382) - Y(348)); // middle time
 
         // Always redraw one stable bubble to prevent stacked artifacts from dirty input screenshots.
         ctx.fillStyle = SCREEN_BG;
-        ctx.fillRect(X(124), Y(414), X(402) - X(124), Y(510) - Y(414));
+        ctx.fillRect(X(124), Y(414), X(404) - X(124), Y(511) - Y(414));
         ctx.fillStyle = BUBBLE_BG;
-        roundRect(ctx, X(132), Y(431), X(397) - X(132), Y(490) - Y(431), S(14));
+        roundRect(ctx, X(132), Y(431), X(397) - X(132), Y(488) - Y(431), S(14));
         ctx.fill();
 
         // 2) Draw dynamic text.
@@ -559,7 +575,8 @@
 
         ctx.fillStyle = "#1b2234";
         ctx.font = `600 ${Math.round(24 * S(1))}px "PingFang SC", sans-serif`;
-        ctx.fillText(title, X(80), Y(108));
+        const topTitle = truncateToWidth(ctx, title, X(268) - X(80));
+        ctx.fillText(topTitle, X(80), Y(108));
 
         ctx.beginPath();
         ctx.fillStyle = stateColor;
@@ -571,10 +588,12 @@
 
         ctx.fillStyle = "#2a2f3e";
         ctx.font = `600 ${Math.round(18 * S(1))}px "PingFang SC", sans-serif`;
-        ctx.fillText(title, X(99), Y(228));
+        const cardTitle = truncateToWidth(ctx, title, X(178) - X(99));
+        ctx.fillText(cardTitle, X(99), Y(228));
         ctx.fillStyle = "#5f6678";
         ctx.font = `${Math.round(15 * S(1))}px "PingFang SC", sans-serif`;
-        ctx.fillText(meta, X(178), Y(228));
+        const metaText = truncateToWidth(ctx, meta, X(352) - X(178));
+        ctx.fillText(metaText, X(178), Y(228));
 
         ctx.fillStyle = "#7f8798";
         ctx.font = `${Math.round(13.5 * S(1))}px "PingFang SC", sans-serif`;
@@ -590,11 +609,8 @@
         ctx.font = `500 ${Math.round(17 * S(1))}px "PingFang SC", sans-serif`;
         ctx.textBaseline = "middle";
         const maxWidth = X(372) - X(176);
-        let msg = profile.message;
-        while (ctx.measureText(msg).width > maxWidth && msg.length > 0) {
-          msg = msg.slice(0, -1);
-        }
-        ctx.fillText(msg, X(176), Y(461));
+        const msg = truncateToWidth(ctx, profile.message, maxWidth);
+        ctx.fillText(msg, X(146), Y(460));
 
         if (!profile.keepOriginalAvatar) {
           drawRandomAvatar(ctx, X(64), Y(235), S(29));
@@ -687,17 +703,24 @@
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
+          if (STRICT_MODE && (img.width !== REF_WIDTH || img.height !== REF_HEIGHT)) {
+            baseImage = null;
+            setStatus(`尺寸不匹配：当前 ${img.width}x${img.height}，固定模式需要 ${REF_WIDTH}x${REF_HEIGHT} 原图。`);
+            URL.revokeObjectURL(url);
+            return;
+          }
+          if (STRICT_MODE && hasDebugBorder(img)) {
+            baseImage = null;
+            setStatus("检测到边缘蓝色虚线/预览边框，请上传最原始聊天截图。");
+            URL.revokeObjectURL(url);
+            return;
+          }
           baseImage = img;
           frameRect = detectPhoneFrame(img);
           syncRectInputs(frameRect);
           currentProfile = randomProfile();
           redrawPreview();
-          const debugHint = hasDebugBorder(img)
-            ? "（检测到边缘可能是预览截图，请尽量上传最原始聊天截图）"
-            : "";
-          setStatus(
-            `底图已加载：${img.width} x ${img.height}，识别区域 ${Math.round(frameRect.w)} x ${Math.round(frameRect.h)} ${debugHint}`
-          );
+          setStatus(`底图已加载：${img.width} x ${img.height}`);
           URL.revokeObjectURL(url);
         };
         img.onerror = () => {
