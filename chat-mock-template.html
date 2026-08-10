@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>聊天页随机模板</title>
+    <title>高仿聊天页随机模板</title>
     <style>
       :root {
-        --bg: #eef1f7;
-        --card: #ffffff;
-        --text: #25262a;
-        --muted: #969aa6;
-        --bubble: #ffd438;
-        --input-bg: #f6f7fb;
-        --shadow: 0 8px 18px rgba(26, 34, 56, 0.08);
+        --page-bg: #d8dce6;
+        --panel-bg: #eef1f8;
+        --white: #ffffff;
+        --text-main: #2b2e36;
+        --text-mid: #6f7482;
+        --text-light: #a3a7b3;
+        --msg-yellow: #ffcf2b;
       }
 
       * {
@@ -25,403 +25,698 @@
         min-height: 100vh;
         display: grid;
         place-items: center;
-        background: #d8dce6;
+        background: var(--page-bg);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
           "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       }
 
+      .viewport {
+        display: grid;
+        gap: 14px;
+      }
+
       .phone {
-        width: min(472px, 96vw);
-        height: min(932px, 96vh);
-        background: var(--bg);
-        border-radius: 28px;
+        width: min(390px, 95vw);
+        height: min(844px, 95vh);
+        background: var(--panel-bg);
+        border-radius: 26px;
         overflow: hidden;
-        box-shadow: 0 18px 50px rgba(18, 25, 45, 0.25);
+        box-shadow: 0 20px 48px rgba(32, 41, 64, 0.28);
         display: flex;
         flex-direction: column;
       }
 
-      .status-bar {
-        height: 38px;
-        padding: 8px 18px 0;
-        color: #111;
-        font-size: 15px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+      .top-white {
         background: #fff;
+      }
+
+      .status-bar {
+        height: 44px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 0 18px 8px;
+        color: #0f1116;
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 1;
+      }
+
+      .status-right {
+        font-size: 21px;
+        letter-spacing: 0.7px;
       }
 
       .nav {
-        height: 68px;
+        height: 56px;
+        padding: 0 14px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 0 16px;
-        background: #fff;
+        gap: 10px;
       }
 
-      .nav-left,
-      .nav-right {
-        width: 56px;
-        color: #333;
-        font-size: 26px;
+      .back-btn,
+      .right-btn {
+        flex: 0 0 36px;
+        color: #2f333f;
         user-select: none;
+        line-height: 1;
       }
 
-      .nav-right {
-        font-size: 24px;
+      .back-btn {
+        font-size: 38px;
+      }
+
+      .right-btn {
+        font-size: 30px;
         text-align: right;
       }
 
-      .title-wrap {
-        flex: 1;
-        text-align: left;
+      .nav-mid {
         min-width: 0;
+        flex: 1;
       }
 
       .title {
-        font-size: 32px;
+        color: #272a33;
         font-weight: 700;
+        font-size: 39px;
         line-height: 1;
-        color: #20222a;
-        margin-bottom: 8px;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
       }
 
-      .sub-title {
-        font-size: 22px;
-        color: #b1b4bf;
+      .status-line {
+        margin-top: 6px;
         display: flex;
         align-items: center;
         gap: 6px;
+        color: #9fa3af;
+        font-size: 20px;
       }
 
       .dot {
-        width: 11px;
-        height: 11px;
+        width: 9px;
+        height: 9px;
         border-radius: 50%;
-        background: #cfd3dd;
+        background: #bfc3ce;
       }
 
-      .card {
-        margin: 14px 16px 0;
-        background: var(--card);
-        border-radius: 16px;
-        box-shadow: var(--shadow);
+      .profile-card,
+      .show-card {
+        margin: 10px 14px 0;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 0 rgba(46, 56, 74, 0.03);
+      }
+
+      .profile-card {
+        padding: 13px 14px 12px;
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 16px;
+        gap: 11px;
         position: relative;
       }
 
-      .avatar {
-        width: 58px;
-        height: 58px;
+      .target-avatar {
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         object-fit: cover;
-        background: #e5ecff;
+        background: #ebf2ff;
       }
 
-      .main-info {
-        flex: 1;
+      .profile-main {
         min-width: 0;
+        flex: 1;
       }
 
       .name-row {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 8px;
         flex-wrap: wrap;
+        margin-bottom: 8px;
       }
 
-      .name {
-        font-size: 30px;
+      .card-name {
+        font-size: 31px;
         font-weight: 700;
-        color: var(--text);
+        line-height: 1;
+        color: var(--text-main);
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9px;
+        color: #5c6270;
+        font-size: 14px;
         line-height: 1;
       }
 
-      .meta {
-        font-size: 21px;
-        color: #52576a;
+      .chip.soft {
+        padding: 4px 8px;
+        background: #f5f6fa;
       }
 
-      .birthday {
-        font-size: 22px;
-        color: #7f8595;
+      .signature {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #8d92a0;
+        font-size: 18px;
+      }
+
+      .sign-dot {
+        color: #ff6a88;
+        font-size: 14px;
+        line-height: 1;
       }
 
       .home-btn {
         position: absolute;
-        right: 12px;
-        top: 12px;
-        background: #fff4f4;
-        color: #4a4f5c;
+        top: 10px;
+        right: 10px;
         border-radius: 999px;
-        padding: 6px 12px;
+        background: #fff5f7;
+        color: #4f5564;
         font-size: 16px;
         font-weight: 700;
-        display: flex;
+        padding: 7px 10px;
+        display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
       }
 
-      .heart {
+      .home-icon {
         width: 18px;
         height: 18px;
         border-radius: 50%;
-        background: #ff7a90;
-        display: inline-block;
+        background: radial-gradient(circle at 38% 38%, #ff8ca6, #ff4e79);
       }
 
-      .chat-time {
+      .show-card {
+        padding: 12px 14px 14px;
+      }
+
+      .show-title {
+        color: #343948;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .show-grid {
+        margin-top: 9px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .show-item {
+        aspect-ratio: 1;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #d0d4df;
+        position: relative;
+      }
+
+      .show-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .more-mask {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 32px;
+        font-weight: 700;
+        background: rgba(0, 0, 0, 0.35);
+      }
+
+      .timeline-time {
+        margin: 12px 0 12px;
         text-align: center;
-        margin: 28px 0 18px;
-        color: #b2b5c1;
+        color: #aeb3bf;
         font-size: 30px;
       }
 
-      .chat-area {
+      .chat-scroll {
         flex: 1;
-        padding: 0 16px;
+        padding: 0 14px;
       }
 
-      .msg-row {
+      .my-row {
         display: flex;
         justify-content: flex-end;
         align-items: flex-start;
-        gap: 10px;
+        gap: 8px;
+        margin-bottom: 10px;
       }
 
-      .bubble {
-        max-width: 74%;
-        background: var(--bubble);
-        color: #212121;
-        border-radius: 14px;
-        padding: 14px 16px;
-        font-size: 30px;
+      .warn-dot {
+        width: 27px;
+        height: 27px;
+        flex: 0 0 27px;
+        margin-top: 10px;
+        border-radius: 50%;
+        background: #ff5f74;
+        color: #fff;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        font-weight: 700;
+      }
+
+      .my-bubble {
+        max-width: 260px;
+        border-radius: 17px;
+        background: var(--msg-yellow);
+        color: #262626;
+        font-size: 35px;
         line-height: 1.25;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        padding: 11px 16px;
       }
 
-      .my-avatar {
-        width: 48px;
-        height: 48px;
+      .me-avatar {
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
       }
 
-      .composer {
-        padding: 12px 14px 10px;
-        background: #fff;
+      .notice {
+        margin-left: 14px;
+        width: fit-content;
+        max-width: 320px;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #a1a6b4;
+        padding: 6px 12px;
+        font-size: 15px;
+        display: none;
       }
 
-      .input-wrap {
+      .notice strong {
+        color: #ffae3b;
+        font-weight: 600;
+      }
+
+      .gift-row {
+        margin-top: 14px;
+        display: none;
+      }
+
+      .gift-card {
+        margin-left: auto;
+        margin-right: 50px;
+        width: 196px;
+        border-radius: 11px;
+        background: #fff;
+        padding: 12px 14px;
+        box-shadow: 0 1px 0 rgba(57, 64, 84, 0.03);
+      }
+
+      .gift-desc {
+        font-size: 16px;
+        color: #b3b7c3;
+        margin-bottom: 4px;
+      }
+
+      .gift-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .gift-name {
+        font-size: 36px;
+        font-weight: 700;
+        color: #272a35;
+      }
+
+      .blue-rose {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 40px;
+        background: radial-gradient(circle at 35% 30%, #7dd1ff, #2b74ff 70%);
+      }
+
+      .composer {
+        background: #fff;
+        padding: 10px 12px 11px;
+      }
+
+      .composer-line {
         display: flex;
         align-items: center;
         gap: 8px;
       }
 
-      .fake-input {
+      .input-fake {
         flex: 1;
-        background: var(--input-bg);
-        border-radius: 28px;
-        color: #c0c3cd;
         height: 42px;
+        background: #f3f5fb;
+        border-radius: 21px;
+        color: #c0c4cf;
+        font-size: 18px;
         display: flex;
         align-items: center;
         padding: 0 16px;
-        font-size: 22px;
       }
 
-      .emoji {
-        font-size: 34px;
+      .more-dot {
+        margin-left: auto;
+        color: #9ea4b3;
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .emoji-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #ffdb61;
+        display: grid;
+        place-items: center;
+        font-size: 24px;
       }
 
       .toolbar {
+        margin-top: 8px;
         display: flex;
         align-items: center;
         gap: 16px;
-        margin-top: 8px;
-        color: #9ea3b2;
-        font-size: 22px;
+        padding-left: 4px;
+      }
+
+      .tool {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+      }
+
+      .tool.photo {
+        background: linear-gradient(135deg, #b27dff, #7a49ff);
+      }
+
+      .tool.camera {
+        background: linear-gradient(135deg, #48b8ff, #2f8dff);
+      }
+
+      .tool.gift {
+        background: linear-gradient(135deg, #ff7a7a, #ff4b57);
       }
 
       .controls {
         display: flex;
-        gap: 10px;
-        margin-top: 8px;
+        gap: 8px;
+        justify-content: center;
       }
 
-      button {
+      .ctrl {
         border: 0;
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
-        font-weight: 600;
+        border-radius: 8px;
+        padding: 8px 11px;
+        font-size: 13px;
         cursor: pointer;
       }
 
-      #randomProfileBtn {
-        background: #2e6cff;
+      .ctrl-primary {
+        background: #2f6dff;
         color: #fff;
       }
 
-      #randomAllBtn {
-        background: #f4f6ff;
-        color: #354168;
+      .ctrl-ghost {
+        background: #ecf0ff;
+        color: #334169;
       }
     </style>
   </head>
   <body>
-    <main class="phone">
-      <div class="status-bar">
-        <span id="systemTime">16:38</span>
-        <span>📶 ᯤ 🔋</span>
+    <div class="viewport">
+      <main class="phone">
+        <div class="top-white">
+          <div class="status-bar">
+            <span id="systemTime">16:38</span>
+            <span class="status-right">◉◉◉ ᯤ ▭</span>
+          </div>
+          <header class="nav">
+            <div class="back-btn">‹</div>
+            <div class="nav-mid">
+              <h1 class="title" id="titleName">天下无敌</h1>
+              <div class="status-line">
+                <i class="dot" id="statusDot"></i>
+                <span id="onlineStatus">离线</span>
+              </div>
+            </div>
+            <div class="right-btn">♡+</div>
+          </header>
+        </div>
+
+        <section class="profile-card">
+          <img class="target-avatar" id="targetAvatar" alt="对方头像" />
+          <div class="profile-main">
+            <div class="name-row">
+              <span class="card-name" id="cardName">天下无敌</span>
+              <span class="chip" id="ageChip">♂32岁</span>
+              <span class="chip soft" id="cityChip">上海</span>
+              <span class="chip soft" id="heightChip">175cm</span>
+            </div>
+            <p class="signature">
+              <span class="sign-dot">●</span>
+              <span id="signatureText">Ta [01-01] 过生日~</span>
+            </p>
+          </div>
+          <span class="home-btn"><i class="home-icon"></i>看主页</span>
+        </section>
+
+        <section class="show-card" id="showCard">
+          <h2 class="show-title" id="showTitle">TA的个人秀（7）</h2>
+          <div class="show-grid" id="showGrid"></div>
+        </section>
+
+        <div class="timeline-time" id="chatTime">16:38</div>
+
+        <section class="chat-scroll">
+          <div class="my-row">
+            <div class="warn-dot" id="warnDot">!</div>
+            <p class="my-bubble" id="messageBubble">和小美聊完了也和小丑聊两句呗</p>
+            <img
+              class="me-avatar"
+              src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?auto=format&fit=crop&w=80&q=80"
+              alt="我的头像"
+            />
+          </div>
+
+          <p class="notice" id="unfollowNotice">
+            对方未关注你,无法进行私聊哦! <strong>查看详情</strong>
+          </p>
+
+          <div class="gift-row" id="giftRow">
+            <div class="gift-card">
+              <p class="gift-desc">送出</p>
+              <div class="gift-main">
+                <strong class="gift-name">玫瑰花X1</strong>
+                <span class="blue-rose">🌹</span>
+              </div>
+            </div>
+            <img
+              class="me-avatar"
+              src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?auto=format&fit=crop&w=80&q=80"
+              alt="我的头像"
+            />
+          </div>
+        </section>
+
+        <footer class="composer">
+          <div class="composer-line">
+            <div class="input-fake">
+              <span>说点什么吧</span>
+              <span class="more-dot">···</span>
+            </div>
+            <span class="emoji-btn">😀</span>
+          </div>
+          <div class="toolbar">
+            <span class="tool photo"></span>
+            <span class="tool camera"></span>
+            <span class="tool gift"></span>
+          </div>
+        </footer>
+      </main>
+
+      <div class="controls">
+        <button class="ctrl ctrl-primary" id="randomSceneBtn">随机生成完整场景</button>
+        <button class="ctrl ctrl-ghost" id="randomTextBtn">仅随机话术</button>
       </div>
-
-      <header class="nav">
-        <div class="nav-left">‹</div>
-        <div class="title-wrap">
-          <h1 class="title" id="titleName">天下无敌</h1>
-          <div class="sub-title">
-            <span class="dot" id="statusDot"></span>
-            <span id="onlineStatus">离线</span>
-          </div>
-        </div>
-        <div class="nav-right">♡+</div>
-      </header>
-
-      <section class="card">
-        <img class="avatar" id="targetAvatar" alt="对方头像" />
-        <div class="main-info">
-          <div class="name-row">
-            <span class="name" id="cardName">天下无敌</span>
-            <span class="meta" id="ageMeta">♂32岁</span>
-            <span class="meta" id="cityMeta">上海</span>
-          </div>
-          <p class="birthday" id="birthdayMeta">○ Ta [01-01] 过生日~</p>
-        </div>
-        <span class="home-btn"><i class="heart"></i>看主页</span>
-      </section>
-
-      <div class="chat-time" id="chatTime">16:38</div>
-
-      <section class="chat-area">
-        <div class="msg-row">
-          <div class="bubble" id="messageBubble">和小美聊完了也和小丑聊两句呗</div>
-          <img
-            class="my-avatar"
-            src="https://images.unsplash.com/photo-1546961329-78bef0414d7c?auto=format&fit=crop&w=96&q=80"
-            alt="我的头像"
-          />
-        </div>
-      </section>
-
-      <footer class="composer">
-        <div class="input-wrap">
-          <div class="fake-input">说点什么吧</div>
-          <span class="emoji">😄</span>
-        </div>
-        <div class="toolbar">
-          <span>🖼️</span>
-          <span>📷</span>
-          <span>🎁</span>
-        </div>
-        <div class="controls">
-          <button id="randomProfileBtn">随机换对方资料</button>
-          <button id="randomAllBtn">资料+话术一起随机</button>
-        </div>
-      </footer>
-    </main>
+    </div>
 
     <script>
-      const names = [
-        "天下无敌",
-        "深夜小宇",
-        "风继续吹",
-        "小城晚风",
-        "阿北同学",
-        "奶糖不甜",
-        "半盏清茶",
-        "晚安橘子",
+      const profilePool = [
+        { name: "天下无敌", gender: "♂", age: 32, city: "上海", birthday: "01-01", status: "离线", height: "" },
+        { name: "谈情不如逗狗。", gender: "♂", age: "", city: "文莱", birthday: "", status: "在线", height: "" },
+        { name: "盛夏，，", gender: "♂", age: "", city: "广东 广州", birthday: "", status: "离线", height: "" },
+        { name: "君傻瓜", gender: "♂", age: 27, city: "四川 凉山", birthday: "01-01", status: "离线", height: "175cm" },
+        { name: "奶崽", gender: "♂", age: "", city: "云南 昆明", birthday: "", status: "离线", height: "" },
+        { name: "深夜小宇", gender: "♀", age: 25, city: "北京", birthday: "08-12", status: "在线", height: "166cm" },
       ];
 
-      const cities = ["上海", "杭州", "深圳", "成都", "北京", "重庆", "南京", "苏州"];
-      const statusList = ["离线", "在线", "忙碌", "隐身"];
-      const genderList = ["♂", "♀"];
-      const messages = [
+      const signatures = ["快来和我聊聊天吧～", "Ta [01-01] 过生日~", "今天很想认识新朋友", "等你来打个招呼～"];
+
+      const msgPool = [
         "和小美聊完了也和小丑聊两句呗",
-        "你这会儿在忙啥呀，想和你说说话～",
-        "看到你在线，打个招呼不介意吧？",
-        "刚好路过你主页，感觉你挺有趣的",
-        "今天心情不错，要不要聊两句",
+        "和小美聊完了以后小丑聊两句呗",
+        "和小美聊完了，也和小丑聊两句呗",
+        "刚刚看到你在线，聊两句吗",
+      ];
+
+      const avatarPool = [
+        "https://images.unsplash.com/photo-1618641986557-1ecd230959aa?auto=format&fit=crop&w=96&q=80",
+        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=96&q=80",
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80",
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=96&q=80",
+        "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=96&q=80",
+      ];
+
+      const galleryPool = [
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=260&q=80",
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=260&q=80",
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=260&q=80",
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=260&q=80",
+        "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=260&q=80",
+        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=260&q=80",
       ];
 
       const statusColor = {
-        离线: "#cfd3dd",
-        在线: "#5ed36b",
-        忙碌: "#ff7e6f",
-        隐身: "#aeb2bf",
+        在线: "#37d46d",
+        离线: "#c6c9d2",
+        忙碌: "#ff6f76",
       };
 
-      const pick = (list) => list[Math.floor(Math.random() * list.length)];
-      const pad = (num) => String(num).padStart(2, "0");
-      const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-      function createProfile() {
-        const name = pick(names);
-        const age = randomInt(20, 39);
-        const city = pick(cities);
-        const gender = pick(genderList);
-        const birthday = `${pad(randomInt(1, 12))}-${pad(randomInt(1, 28))}`;
-        const status = pick(statusList);
-        const seed = `${name}-${age}-${city}-${birthday}-${Date.now()}`;
-        const avatar = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(seed)}`;
-        return { name, age, city, gender, birthday, status, avatar };
-      }
-
-      function renderProfile(profile) {
-        document.getElementById("titleName").textContent = profile.name;
-        document.getElementById("cardName").textContent = profile.name;
-        document.getElementById("ageMeta").textContent = `${profile.gender}${profile.age}岁`;
-        document.getElementById("cityMeta").textContent = profile.city;
-        document.getElementById("birthdayMeta").textContent = `○ Ta [${profile.birthday}] 过生日~`;
-        document.getElementById("onlineStatus").textContent = profile.status;
-        document.getElementById("statusDot").style.background = statusColor[profile.status] || "#cfd3dd";
-        document.getElementById("targetAvatar").src = profile.avatar;
-      }
-
-      function renderRandomMessage() {
-        document.getElementById("messageBubble").textContent = pick(messages);
-      }
+      const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      const bool = (rate) => Math.random() < rate;
+      const pad = (v) => String(v).padStart(2, "0");
+      const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
       function renderTime() {
         const now = new Date();
-        const current = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        document.getElementById("systemTime").textContent = current;
-        document.getElementById("chatTime").textContent = current;
+        const t = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        document.getElementById("systemTime").textContent = t;
+        document.getElementById("chatTime").textContent = t;
       }
 
-      document.getElementById("randomProfileBtn").addEventListener("click", () => {
-        renderProfile(createProfile());
+      function renderProfile(profile) {
+        const realProfile = { ...profile };
+        realProfile.avatar = pick(avatarPool);
+        if (realProfile.age === "" && bool(0.45)) {
+          realProfile.age = rand(22, 34);
+        }
+        if (!realProfile.city) {
+          realProfile.city = "上海";
+        }
+        if (!realProfile.status) {
+          realProfile.status = "离线";
+        }
+        if (!realProfile.birthday && bool(0.4)) {
+          realProfile.birthday = `${pad(rand(1, 12))}-${pad(rand(1, 28))}`;
+        }
+
+        document.getElementById("titleName").textContent = realProfile.name;
+        document.getElementById("cardName").textContent = realProfile.name;
+        document.getElementById("targetAvatar").src = realProfile.avatar;
+        document.getElementById("onlineStatus").textContent = realProfile.status;
+        document.getElementById("statusDot").style.background = statusColor[realProfile.status] || "#c6c9d2";
+
+        const ageChip = document.getElementById("ageChip");
+        const cityChip = document.getElementById("cityChip");
+        const heightChip = document.getElementById("heightChip");
+        const signText = document.getElementById("signatureText");
+
+        ageChip.style.display = realProfile.age ? "inline-flex" : "none";
+        ageChip.textContent = `${realProfile.gender || "♂"}${realProfile.age}岁`;
+
+        cityChip.textContent = realProfile.city;
+        cityChip.style.display = "inline-flex";
+
+        if (realProfile.height) {
+          heightChip.style.display = "inline-flex";
+          heightChip.textContent = realProfile.height;
+        } else {
+          heightChip.style.display = "none";
+        }
+
+        signText.textContent = realProfile.birthday
+          ? `Ta [${realProfile.birthday}] 过生日~`
+          : pick(signatures);
+      }
+
+      function renderGallery(showGallery) {
+        const showCard = document.getElementById("showCard");
+        const grid = document.getElementById("showGrid");
+        const title = document.getElementById("showTitle");
+        if (!showGallery) {
+          showCard.style.display = "none";
+          return;
+        }
+
+        showCard.style.display = "block";
+        grid.innerHTML = "";
+        const total = rand(2, 9);
+        title.textContent = `TA的个人秀（${total}）`;
+
+        const cards = Math.min(3, total);
+        for (let i = 0; i < cards; i += 1) {
+          const item = document.createElement("div");
+          item.className = "show-item";
+          const img = document.createElement("img");
+          img.src = pick(galleryPool);
+          img.alt = `个人秀 ${i + 1}`;
+          item.appendChild(img);
+          if (i === cards - 1 && total > 3) {
+            const more = document.createElement("span");
+            more.className = "more-mask";
+            more.textContent = `+${total - 3}`;
+            item.appendChild(more);
+          }
+          grid.appendChild(item);
+        }
+      }
+
+      function renderChatScene() {
+        document.getElementById("messageBubble").textContent = pick(msgPool);
+        const showWarning = bool(0.28);
+        const showGift = showWarning && bool(0.65);
+        document.getElementById("warnDot").style.display = showWarning ? "inline-flex" : "none";
+        document.getElementById("unfollowNotice").style.display = showWarning ? "inline-block" : "none";
+        document.getElementById("giftRow").style.display = showGift ? "flex" : "none";
+      }
+
+      function renderScene() {
+        renderTime();
+        renderProfile(pick(profilePool));
+        renderGallery(bool(0.55));
+        renderChatScene();
+      }
+
+      document.getElementById("randomSceneBtn").addEventListener("click", renderScene);
+      document.getElementById("randomTextBtn").addEventListener("click", renderChatScene);
+      window.addEventListener("keydown", (event) => {
+        if (event.key.toLowerCase() === "r") {
+          renderScene();
+        }
       });
 
-      document.getElementById("randomAllBtn").addEventListener("click", () => {
-        renderProfile(createProfile());
-        renderRandomMessage();
-      });
-
-      renderProfile(createProfile());
-      renderRandomMessage();
-      renderTime();
-      setInterval(renderTime, 1000 * 20);
+      renderScene();
+      setInterval(renderTime, 20 * 1000);
     </script>
   </body>
 </html>
