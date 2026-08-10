@@ -78,6 +78,41 @@
         background: #141a28;
       }
 
+      .rect-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .rect-grid .item {
+        display: grid;
+        gap: 5px;
+      }
+
+      .rect-grid .item span {
+        font-size: 11px;
+        color: #a9b2cf;
+      }
+
+      .tiny-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .tiny-actions button {
+        flex: 1;
+        font-size: 12px;
+        padding: 8px;
+      }
+
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #b8c0da;
+      }
+
       .actions {
         display: grid;
         gap: 8px;
@@ -169,6 +204,36 @@
           <input id="batchCount" type="number" min="1" max="50" value="10" />
         </div>
 
+        <div class="block">
+          <label>3) 覆盖区域微调（像素）</label>
+          <div class="rect-grid">
+            <label class="item">
+              <span>X</span>
+              <input id="frameX" type="number" value="0" />
+            </label>
+            <label class="item">
+              <span>Y</span>
+              <input id="frameY" type="number" value="0" />
+            </label>
+            <label class="item">
+              <span>宽 W</span>
+              <input id="frameW" type="number" value="473" />
+            </label>
+            <label class="item">
+              <span>高 H</span>
+              <input id="frameH" type="number" value="1024" />
+            </label>
+          </div>
+          <div class="tiny-actions">
+            <button class="btn-sub" id="autoRectBtn" type="button">重新自动识别</button>
+            <button class="btn-sub" id="applyRectBtn" type="button">应用校准</button>
+          </div>
+          <label class="check">
+            <input id="showFrameGuide" type="checkbox" checked />
+            显示覆盖区域边框（用于对齐）
+          </label>
+        </div>
+
         <div class="actions">
           <button class="btn-primary" id="previewBtn">随机预览 1 张</button>
           <button class="btn-sub" id="exportBtn">批量导出随机图</button>
@@ -207,11 +272,19 @@
       const previewCtx = previewCanvas.getContext("2d");
       const uploadInput = document.getElementById("baseUpload");
       const batchCountInput = document.getElementById("batchCount");
+      const frameXInput = document.getElementById("frameX");
+      const frameYInput = document.getElementById("frameY");
+      const frameWInput = document.getElementById("frameW");
+      const frameHInput = document.getElementById("frameH");
+      const autoRectBtn = document.getElementById("autoRectBtn");
+      const applyRectBtn = document.getElementById("applyRectBtn");
+      const showFrameGuideInput = document.getElementById("showFrameGuide");
       const thumbs = document.getElementById("thumbs");
       const statusText = document.getElementById("statusText");
 
       let baseImage = null;
       let frameRect = null;
+      let currentProfile = randomProfile();
 
       function pick(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
@@ -249,6 +322,43 @@
 
       function setStatus(message) {
         statusText.textContent = message;
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function normalizeRect(rect, width, height) {
+        const minSize = 80;
+        const x = clamp(Math.round(rect.x || 0), 0, Math.max(0, width - minSize));
+        const y = clamp(Math.round(rect.y || 0), 0, Math.max(0, height - minSize));
+        const w = clamp(Math.round(rect.w || width), minSize, width - x);
+        const h = clamp(Math.round(rect.h || height), minSize, height - y);
+        return { x, y, w, h };
+      }
+
+      function syncRectInputs(rect) {
+        frameXInput.value = Math.round(rect.x);
+        frameYInput.value = Math.round(rect.y);
+        frameWInput.value = Math.round(rect.w);
+        frameHInput.value = Math.round(rect.h);
+      }
+
+      function readRectInputs() {
+        const fallback = frameRect || { x: 0, y: 0, w: REF_WIDTH, h: REF_HEIGHT };
+        return {
+          x: Number(frameXInput.value || fallback.x),
+          y: Number(frameYInput.value || fallback.y),
+          w: Number(frameWInput.value || fallback.w),
+          h: Number(frameHInput.value || fallback.h),
+        };
+      }
+
+      function getActiveRect() {
+        if (!baseImage) {
+          return { x: 0, y: 0, w: REF_WIDTH, h: REF_HEIGHT };
+        }
+        return normalizeRect(readRectInputs(), baseImage.width, baseImage.height);
       }
 
       function roundRect(ctx, x, y, width, height, radius) {
@@ -355,14 +465,15 @@
         };
       }
 
-      function drawVariant(canvas, profile) {
+      function drawVariant(canvas, profile, options = {}) {
         if (!baseImage) {
           return;
         }
+        const { showGuide = false } = options;
         const ctx = canvas.getContext("2d");
         canvas.width = baseImage.width;
         canvas.height = baseImage.height;
-        const rect = frameRect || { x: 0, y: 0, w: baseImage.width, h: baseImage.height };
+        const rect = getActiveRect();
         const sx = rect.w / REF_WIDTH;
         const sy = rect.h / REF_HEIGHT;
         const S = (n) => n * Math.min(sx, sy);
@@ -436,6 +547,27 @@
         if (!profile.keepOriginalAvatar) {
           drawRandomAvatar(ctx, X(64), Y(235), S(29));
         }
+
+        if (showGuide) {
+          ctx.save();
+          ctx.strokeStyle = "rgba(75, 130, 255, 0.9)";
+          ctx.lineWidth = Math.max(1, S(2));
+          ctx.setLineDash([Math.max(4, S(8)), Math.max(3, S(5))]);
+          ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+          ctx.fillStyle = "rgba(75, 130, 255, 0.95)";
+          ctx.fillRect(rect.x - 3, rect.y - 3, 6, 6);
+          ctx.fillRect(rect.x + rect.w - 3, rect.y - 3, 6, 6);
+          ctx.fillRect(rect.x - 3, rect.y + rect.h - 3, 6, 6);
+          ctx.fillRect(rect.x + rect.w - 3, rect.y + rect.h - 3, 6, 6);
+          ctx.restore();
+        }
+      }
+
+      function redrawPreview() {
+        if (!baseImage) {
+          return;
+        }
+        drawVariant(previewCanvas, currentProfile, { showGuide: showFrameGuideInput.checked });
       }
 
       function toBlob(canvas) {
@@ -449,7 +581,8 @@
           setStatus("请先上传底图。");
           return;
         }
-        drawVariant(previewCanvas, randomProfile());
+        currentProfile = randomProfile();
+        redrawPreview();
         setStatus("已生成 1 张预览。");
       }
 
@@ -464,7 +597,7 @@
 
         for (let i = 0; i < count; i += 1) {
           const canvas = document.createElement("canvas");
-          drawVariant(canvas, randomProfile());
+          drawVariant(canvas, randomProfile(), { showGuide: false });
           const blob = await toBlob(canvas);
           if (!blob) {
             continue;
@@ -495,7 +628,9 @@
         img.onload = () => {
           baseImage = img;
           frameRect = detectPhoneFrame(img);
-          drawVariant(previewCanvas, randomProfile());
+          syncRectInputs(frameRect);
+          currentProfile = randomProfile();
+          redrawPreview();
           setStatus(
             `底图已加载：${img.width} x ${img.height}，识别区域 ${Math.round(frameRect.w)} x ${Math.round(frameRect.h)}`
           );
@@ -510,6 +645,35 @@
 
       document.getElementById("previewBtn").addEventListener("click", previewOne);
       document.getElementById("exportBtn").addEventListener("click", exportBatch);
+      autoRectBtn.addEventListener("click", () => {
+        if (!baseImage) {
+          setStatus("请先上传底图。");
+          return;
+        }
+        frameRect = detectPhoneFrame(baseImage);
+        syncRectInputs(frameRect);
+        redrawPreview();
+        setStatus("已重新自动识别覆盖区域。");
+      });
+      applyRectBtn.addEventListener("click", () => {
+        if (!baseImage) {
+          setStatus("请先上传底图。");
+          return;
+        }
+        frameRect = getActiveRect();
+        syncRectInputs(frameRect);
+        redrawPreview();
+        setStatus(`已应用校准：x=${frameRect.x}, y=${frameRect.y}, w=${frameRect.w}, h=${frameRect.h}`);
+      });
+      [frameXInput, frameYInput, frameWInput, frameHInput].forEach((input) => {
+        input.addEventListener("input", () => {
+          if (!baseImage) {
+            return;
+          }
+          redrawPreview();
+        });
+      });
+      showFrameGuideInput.addEventListener("change", redrawPreview);
 
       previewCtx.fillStyle = "#11151f";
       previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
