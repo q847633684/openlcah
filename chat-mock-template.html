@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>聊天页随机模板</title>
+    <style>
+      :root {
+        --bg: #eef1f7;
+        --card: #ffffff;
+        --text: #25262a;
+        --muted: #969aa6;
+        --bubble: #ffd438;
+        --input-bg: #f6f7fb;
+        --shadow: 0 8px 18px rgba(26, 34, 56, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #d8dce6;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
+
+      .phone {
+        width: min(472px, 96vw);
+        height: min(932px, 96vh);
+        background: var(--bg);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 18px 50px rgba(18, 25, 45, 0.25);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .status-bar {
+        height: 38px;
+        padding: 8px 18px 0;
+        color: #111;
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+      }
+
+      .nav {
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        background: #fff;
+      }
+
+      .nav-left,
+      .nav-right {
+        width: 56px;
+        color: #333;
+        font-size: 26px;
+        user-select: none;
+      }
+
+      .nav-right {
+        font-size: 24px;
+        text-align: right;
+      }
+
+      .title-wrap {
+        flex: 1;
+        text-align: left;
+        min-width: 0;
+      }
+
+      .title {
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1;
+        color: #20222a;
+        margin-bottom: 8px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      .sub-title {
+        font-size: 22px;
+        color: #b1b4bf;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #cfd3dd;
+      }
+
+      .card {
+        margin: 14px 16px 0;
+        background: var(--card);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        position: relative;
+      }
+
+      .avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #e5ecff;
+      }
+
+      .main-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .name-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .name {
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1;
+      }
+
+      .meta {
+        font-size: 21px;
+        color: #52576a;
+      }
+
+      .birthday {
+        font-size: 22px;
+        color: #7f8595;
+      }
+
+      .home-btn {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        background: #fff4f4;
+        color: #4a4f5c;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .heart {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ff7a90;
+        display: inline-block;
+      }
+
+      .chat-time {
+        text-align: center;
+        margin: 28px 0 18px;
+        color: #b2b5c1;
+        font-size: 30px;
+      }
+
+      .chat-area {
+        flex: 1;
+        padding: 0 16px;
+      }
+
+      .msg-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .bubble {
+        max-width: 74%;
+        background: var(--bubble);
+        color: #212121;
+        border-radius: 14px;
+        padding: 14px 16px;
+        font-size: 30px;
+        line-height: 1.25;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      }
+
+      .my-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .composer {
+        padding: 12px 14px 10px;
+        background: #fff;
+      }
+
+      .input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .fake-input {
+        flex: 1;
+        background: var(--input-bg);
+        border-radius: 28px;
+        color: #c0c3cd;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        font-size: 22px;
+      }
+
+      .emoji {
+        font-size: 34px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 8px;
+        color: #9ea3b2;
+        font-size: 22px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      #randomProfileBtn {
+        background: #2e6cff;
+        color: #fff;
+      }
+
+      #randomAllBtn {
+        background: #f4f6ff;
+        color: #354168;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="phone">
+      <div class="status-bar">
+        <span id="systemTime">16:38</span>
+        <span>📶 ᯤ 🔋</span>
+      </div>
+
+      <header class="nav">
+        <div class="nav-left">‹</div>
+        <div class="title-wrap">
+          <h1 class="title" id="titleName">天下无敌</h1>
+          <div class="sub-title">
+            <span class="dot" id="statusDot"></span>
+            <span id="onlineStatus">离线</span>
+          </div>
+        </div>
+        <div class="nav-right">♡+</div>
+      </header>
+
+      <section class="card">
+        <img class="avatar" id="targetAvatar" alt="对方头像" />
+        <div class="main-info">
+          <div class="name-row">
+            <span class="name" id="cardName">天下无敌</span>
+            <span class="meta" id="ageMeta">♂32岁</span>
+            <span class="meta" id="cityMeta">上海</span>
+          </div>
+          <p class="birthday" id="birthdayMeta">○ Ta [01-01] 过生日~</p>
+        </div>
+        <span class="home-btn"><i class="heart"></i>看主页</span>
+      </section>
+
+      <div class="chat-time" id="chatTime">16:38</div>
+
+      <section class="chat-area">
+        <div class="msg-row">
+          <div class="bubble" id="messageBubble">和小美聊完了也和小丑聊两句呗</div>
+          <img
+            class="my-avatar"
+            src="https://images.unsplash.com/photo-1546961329-78bef0414d7c?auto=format&fit=crop&w=96&q=80"
+            alt="我的头像"
+          />
+        </div>
+      </section>
+
+      <footer class="composer">
+        <div class="input-wrap">
+          <div class="fake-input">说点什么吧</div>
+          <span class="emoji">😄</span>
+        </div>
+        <div class="toolbar">
+          <span>🖼️</span>
+          <span>📷</span>
+          <span>🎁</span>
+        </div>
+        <div class="controls">
+          <button id="randomProfileBtn">随机换对方资料</button>
+          <button id="randomAllBtn">资料+话术一起随机</button>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      const names = [
+        "天下无敌",
+        "深夜小宇",
+        "风继续吹",
+        "小城晚风",
+        "阿北同学",
+        "奶糖不甜",
+        "半盏清茶",
+        "晚安橘子",
+      ];
+
+      const cities = ["上海", "杭州", "深圳", "成都", "北京", "重庆", "南京", "苏州"];
+      const statusList = ["离线", "在线", "忙碌", "隐身"];
+      const genderList = ["♂", "♀"];
+      const messages = [
+        "和小美聊完了也和小丑聊两句呗",
+        "你这会儿在忙啥呀，想和你说说话～",
+        "看到你在线，打个招呼不介意吧？",
+        "刚好路过你主页，感觉你挺有趣的",
+        "今天心情不错，要不要聊两句",
+      ];
+
+      const statusColor = {
+        离线: "#cfd3dd",
+        在线: "#5ed36b",
+        忙碌: "#ff7e6f",
+        隐身: "#aeb2bf",
+      };
+
+      const pick = (list) => list[Math.floor(Math.random() * list.length)];
+      const pad = (num) => String(num).padStart(2, "0");
+      const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+      function createProfile() {
+        const name = pick(names);
+        const age = randomInt(20, 39);
+        const city = pick(cities);
+        const gender = pick(genderList);
+        const birthday = `${pad(randomInt(1, 12))}-${pad(randomInt(1, 28))}`;
+        const status = pick(statusList);
+        const seed = `${name}-${age}-${city}-${birthday}-${Date.now()}`;
+        const avatar = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(seed)}`;
+        return { name, age, city, gender, birthday, status, avatar };
+      }
+
+      function renderProfile(profile) {
+        document.getElementById("titleName").textContent = profile.name;
+        document.getElementById("cardName").textContent = profile.name;
+        document.getElementById("ageMeta").textContent = `${profile.gender}${profile.age}岁`;
+        document.getElementById("cityMeta").textContent = profile.city;
+        document.getElementById("birthdayMeta").textContent = `○ Ta [${profile.birthday}] 过生日~`;
+        document.getElementById("onlineStatus").textContent = profile.status;
+        document.getElementById("statusDot").style.background = statusColor[profile.status] || "#cfd3dd";
+        document.getElementById("targetAvatar").src = profile.avatar;
+      }
+
+      function renderRandomMessage() {
+        document.getElementById("messageBubble").textContent = pick(messages);
+      }
+
+      function renderTime() {
+        const now = new Date();
+        const current = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        document.getElementById("systemTime").textContent = current;
+        document.getElementById("chatTime").textContent = current;
+      }
+
+      document.getElementById("randomProfileBtn").addEventListener("click", () => {
+        renderProfile(createProfile());
+      });
+
+      document.getElementById("randomAllBtn").addEventListener("click", () => {
+        renderProfile(createProfile());
+        renderRandomMessage();
+      });
+
+      renderProfile(createProfile());
+      renderRandomMessage();
+      renderTime();
+      setInterval(renderTime, 1000 * 20);
+    </script>
+  </body>
+</html>
