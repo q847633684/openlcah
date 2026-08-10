@@ -3,16 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>聊天模板（高仿版）</title>
+    <title>截图覆盖随机器</title>
     <style>
       :root {
-        --page-bg: #171717;
-        --screen-bg: #edf0f7;
-        --nav-bg: #ffffff;
-        --text-main: #202430;
-        --text-subtle: #9fa6b7;
-        --bubble: #ffce2e;
-        --card-radius: 15px;
+        --bg: #0f1117;
+        --panel: #1a1f2c;
+        --panel-soft: #242a3a;
+        --text: #f5f7ff;
+        --muted: #9aa3bd;
+        --accent: #4e7bff;
       }
 
       * {
@@ -23,508 +22,445 @@
 
       body {
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: var(--page-bg);
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+        padding: 16px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI",
           "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       }
 
-      .phone {
-        width: min(390px, 96vw);
-        height: min(844px, 97vh);
-        background: var(--screen-bg);
-        border-radius: 24px;
-        overflow: hidden;
-        box-shadow: 0 26px 50px rgba(0, 0, 0, 0.45);
-        display: flex;
-        flex-direction: column;
-      }
-
-      .status {
-        background: var(--nav-bg);
-        height: 44px;
-        padding: 11px 14px 0;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-      }
-
-      .status-time {
-        color: #10131a;
-        font-size: 19px;
-        font-weight: 700;
-        letter-spacing: 0.2px;
-      }
-
-      .status-icons {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-      }
-
-      .signal {
-        width: 16px;
-        height: 12px;
+      .app {
+        max-width: 1200px;
+        margin: 0 auto;
         display: grid;
-        grid-template-columns: repeat(4, 3px);
-        gap: 1px;
-        align-items: end;
+        gap: 14px;
+        grid-template-columns: 320px 1fr;
       }
 
-      .signal i {
-        display: block;
-        background: #61a8ff;
-        border-radius: 1px;
-      }
-
-      .signal i:nth-child(1) {
-        height: 4px;
-      }
-
-      .signal i:nth-child(2) {
-        height: 7px;
-      }
-
-      .signal i:nth-child(3) {
-        height: 9px;
-      }
-
-      .signal i:nth-child(4) {
-        height: 11px;
-      }
-
-      .wifi {
-        width: 13px;
-        height: 10px;
-        border: 2px solid transparent;
-        border-top-color: #111;
-        border-radius: 50%;
-        position: relative;
-      }
-
-      .wifi::after {
-        content: "";
-        position: absolute;
-        left: 2px;
-        top: -1px;
-        width: 5px;
-        height: 5px;
-        border: 2px solid transparent;
-        border-top-color: #111;
-        border-radius: 50%;
-      }
-
-      .battery {
-        width: 18px;
-        height: 11px;
-        border: 1.6px solid #9dc890;
-        border-radius: 3px;
-        padding: 1px;
-        position: relative;
-      }
-
-      .battery::after {
-        content: "";
-        position: absolute;
-        right: -3px;
-        top: 3px;
-        width: 2px;
-        height: 4px;
-        background: #9dc890;
-        border-radius: 1px;
-      }
-
-      .battery i {
-        display: block;
-        width: 100%;
-        height: 100%;
-        background: #9ed57e;
-        border-radius: 1px;
-      }
-
-      .nav {
-        height: 64px;
-        background: var(--nav-bg);
-        padding: 0 16px;
-        display: flex;
-        align-items: center;
-      }
-
-      .nav-back {
-        width: 22px;
-        color: #161a24;
-        font-size: 23px;
-        line-height: 1;
-      }
-
-      .nav-main {
-        margin-left: 8px;
-        flex: 1;
-        min-width: 0;
-      }
-
-      .title {
-        font-size: 21px;
-        line-height: 1;
-        font-weight: 700;
-        color: #101625;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .online-row {
-        margin-top: 6px;
-        color: #aab0c0;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .online-dot {
-        width: 11px;
-        height: 11px;
-        border-radius: 50%;
-        background: #32d365;
-      }
-
-      .nav-right {
-        width: 34px;
-        text-align: right;
-        font-size: 24px;
-        line-height: 1;
-        color: #1f2331;
-      }
-
-      .profile-card {
-        margin: 12px 16px 0;
-        border-radius: var(--card-radius);
-        background: #fff;
-        padding: 12px;
-        display: flex;
-        gap: 11px;
-        align-items: center;
-      }
-
-      .target-avatar {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-
-      .profile-text {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .profile-head {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        min-width: 0;
-      }
-
-      .name {
-        color: var(--text-main);
-        font-size: 20px;
-        font-weight: 700;
-        white-space: nowrap;
-        max-width: 130px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .meta {
-        color: #52586b;
-        font-size: 14px;
-        white-space: nowrap;
-      }
-
-      .profile-sub {
-        margin-top: 8px;
-        color: #7f8698;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .birthday-dot {
-        color: #98a0b6;
-      }
-
-      .home-chip {
-        border-radius: 999px;
-        background: #fff5f7;
-        color: #353b4f;
-        font-size: 14px;
-        padding: 6px 10px;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        align-self: flex-start;
-      }
-
-      .home-chip i {
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 35%, #ff97af, #ff5f88);
-      }
-
-      .chat-time {
-        margin-top: 30px;
-        text-align: center;
-        color: #a9afbe;
-        font-size: 17px;
-      }
-
-      .chat-body {
-        flex: 1;
-        padding: 22px 14px 0;
-      }
-
-      .message-row {
-        display: flex;
-        justify-content: flex-end;
-        align-items: flex-start;
-        gap: 8px;
-      }
-
-      .bubble {
-        max-width: 326px;
-        background: var(--bubble);
+      .panel {
+        background: var(--panel);
         border-radius: 14px;
-        color: #1f242e;
-        font-size: 18px;
-        line-height: 1.34;
-        padding: 14px 15px;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
-      }
-
-      .my-avatar {
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-
-      .composer {
-        background: #fff;
-        padding: 12px 14px 10px;
-      }
-
-      .input-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .fake-input {
-        flex: 1;
-        height: 40px;
-        border-radius: 20px;
-        background: #f4f6fb;
-        padding: 0 16px;
-        color: #c5cad5;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-      }
-
-      .emoji {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: #ffd64f;
-        font-size: 24px;
+        padding: 14px;
         display: grid;
-        place-items: center;
+        gap: 12px;
+        align-content: start;
       }
 
-      .tool-row {
-        margin-top: 10px;
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        color: #9096a8;
-        font-size: 22px;
+      .panel h1 {
+        font-size: 18px;
       }
 
-      .action-row {
-        margin-top: 10px;
-        display: flex;
+      .panel p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .block {
+        background: var(--panel-soft);
+        border-radius: 10px;
+        padding: 10px;
+        display: grid;
         gap: 8px;
       }
 
-      .btn {
+      .block label {
+        font-size: 13px;
+      }
+
+      input[type="file"],
+      input[type="number"] {
+        width: 100%;
+        border: 1px solid #38415d;
+        border-radius: 8px;
+        padding: 8px 10px;
+        color: #e9ecff;
+        background: #141a28;
+      }
+
+      .actions {
+        display: grid;
+        gap: 8px;
+      }
+
+      button {
         border: 0;
         border-radius: 9px;
-        padding: 8px 12px;
-        font-size: 13px;
-        line-height: 1;
+        padding: 10px;
+        font-size: 14px;
         cursor: pointer;
       }
 
       .btn-primary {
+        background: linear-gradient(180deg, #4d7dff, #3559e6);
         color: #fff;
-        background: linear-gradient(180deg, #3d7bff, #2b57f1);
-        box-shadow: 0 3px 8px rgba(56, 88, 241, 0.25);
       }
 
-      .btn-muted {
-        color: #2e3a64;
-        background: #f1f3ff;
+      .btn-sub {
+        background: #eef2ff;
+        color: #2f3f76;
+      }
+
+      .status {
+        font-size: 12px;
+        color: #cfd6f0;
+      }
+
+      .workspace {
+        background: var(--panel);
+        border-radius: 14px;
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .preview-wrap {
+        overflow: auto;
+        border-radius: 10px;
+        background: #0b0d13;
+        border: 1px solid #2f364b;
+        max-height: 82vh;
+        display: grid;
+        place-items: start center;
+        padding: 10px;
+      }
+
+      canvas {
+        background: #fff;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .thumbs {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 8px;
+      }
+
+      .thumbs img {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #36405c;
+      }
+
+      @media (max-width: 900px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <main class="phone">
-      <div class="status">
-        <span class="status-time" id="topTime">17:32</span>
-        <div class="status-icons">
-          <span class="signal"><i></i><i></i><i></i><i></i></span>
-          <span class="wifi"></span>
-          <span class="battery"><i></i></span>
-        </div>
-      </div>
+    <div class="app">
+      <aside class="panel">
+        <h1>截图覆盖随机器</h1>
+        <p>
+          用你提供的原始截图做底图，只覆盖名字、时间、资料文案和消息气泡。头像按你要求：
+          <strong>50% 保留原图头像，50% 自动随机生成</strong>。
+        </p>
 
-      <header class="nav">
-        <span class="nav-back">‹</span>
-        <div class="nav-main">
-          <h1 class="title" id="titleName">深夜小宇</h1>
-          <p class="online-row"><i class="online-dot" id="statusDot"></i><span id="statusText">在线</span></p>
+        <div class="block">
+          <label for="baseUpload">1) 上传底图（你发给我的这张截图）</label>
+          <input id="baseUpload" type="file" accept="image/*" />
         </div>
-        <span class="nav-right">♡+</span>
-      </header>
 
-      <section class="profile-card">
-        <img class="target-avatar" id="targetAvatar" alt="对方头像" />
-        <div class="profile-text">
-          <div class="profile-head">
-            <strong class="name" id="cardName">深夜小宇</strong>
-            <span class="meta" id="cardMeta">♀21岁 北京</span>
-          </div>
-          <p class="profile-sub"><span class="birthday-dot">○</span><span id="signature">Ta [10-22] 过生日~</span></p>
+        <div class="block">
+          <label for="batchCount">2) 批量导出数量</label>
+          <input id="batchCount" type="number" min="1" max="50" value="10" />
         </div>
-        <span class="home-chip"><i></i>看主页</span>
-      </section>
 
-      <p class="chat-time" id="midTime">17:32</p>
+        <div class="actions">
+          <button class="btn-primary" id="previewBtn">随机预览 1 张</button>
+          <button class="btn-sub" id="exportBtn">批量导出随机图</button>
+        </div>
 
-      <section class="chat-body">
-        <div class="message-row">
-          <div class="bubble" id="bubbleText">和小美聊完了也和小丑聊两句呗</div>
-          <img
-            class="my-avatar"
-            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=88&q=80"
-            alt="我的头像"
-          />
-        </div>
-      </section>
+        <p class="status" id="statusText">等待上传底图…</p>
+      </aside>
 
-      <footer class="composer">
-        <div class="input-row">
-          <div class="fake-input">说点什么吧</div>
-          <span class="emoji">😄</span>
+      <main class="workspace">
+        <div class="preview-wrap">
+          <canvas id="previewCanvas" width="473" height="1024"></canvas>
         </div>
-        <div class="tool-row">
-          <span>🖼️</span>
-          <span>📷</span>
-          <span>🎁</span>
-        </div>
-        <div class="action-row">
-          <button class="btn btn-primary" id="randomProfileBtn">随机换对方资料</button>
-          <button class="btn btn-muted" id="randomAllBtn">资料+话术一起随机</button>
-        </div>
-      </footer>
-    </main>
+        <div class="thumbs" id="thumbs"></div>
+      </main>
+    </div>
 
     <script>
-      const profiles = [
-        { name: "深夜小宇", gender: "♀", age: 21, city: "北京", birthday: "10-22", status: "在线" },
-        { name: "天下无敌", gender: "♂", age: 32, city: "上海", birthday: "01-01", status: "离线" },
-        { name: "君傻瓜", gender: "♂", age: 27, city: "四川 凉山", birthday: "01-01", status: "离线" },
-        { name: "奶崽", gender: "♂", age: "", city: "云南 昆明", birthday: "", status: "离线" },
-        { name: "盛夏，，", gender: "♂", age: "", city: "广东 广州", birthday: "", status: "离线" },
-        { name: "谈情不如逗狗。", gender: "♂", age: "", city: "文莱", birthday: "", status: "在线" },
-      ];
+      const REF_WIDTH = 473;
+      const REF_HEIGHT = 1024;
+      const SCREEN_BG = "#edf0f7";
+      const NAV_BG = "#ffffff";
+      const BUBBLE_BG = "#ffcf2f";
 
-      const targetAvatars = [
-        "https://api.dicebear.com/9.x/thumbs/svg?seed=night",
-        "https://api.dicebear.com/9.x/thumbs/svg?seed=enemy",
-        "https://api.dicebear.com/9.x/thumbs/svg?seed=summer",
-        "https://api.dicebear.com/9.x/thumbs/svg?seed=bear",
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=88&q=80",
-        "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=88&q=80",
-      ];
-
-      const chats = [
+      const names = ["天下无敌", "深夜小宇", "君傻瓜", "奶崽", "盛夏，，", "谈情不如逗狗。", "阿北", "晚安橘子"];
+      const cities = ["上海", "北京", "广东 广州", "四川 凉山", "云南 昆明", "文莱", "杭州", "苏州"];
+      const genders = ["♂", "♀"];
+      const messages = [
         "和小美聊完了也和小丑聊两句呗",
         "和小美聊完了以后小丑聊两句呗",
-        "和小美聊完了，也和小丑聊两句呗",
-        "你看起来很有趣，要不要聊聊",
+        "刚刚看到你在线，来聊两句吗",
+        "我刚好路过，想和你打个招呼",
       ];
+      const onlineStates = ["在线", "离线"];
 
-      const statusStyle = {
-        在线: { color: "#32d365" },
-        离线: { color: "#c4c9d2" },
-        忙碌: { color: "#ff6e7b" },
-      };
+      const previewCanvas = document.getElementById("previewCanvas");
+      const previewCtx = previewCanvas.getContext("2d");
+      const uploadInput = document.getElementById("baseUpload");
+      const batchCountInput = document.getElementById("batchCount");
+      const thumbs = document.getElementById("thumbs");
+      const statusText = document.getElementById("statusText");
 
-      const pick = (list) => list[Math.floor(Math.random() * list.length)];
-      const pad = (num) => String(num).padStart(2, "0");
+      let baseImage = null;
 
-      function nowHm() {
-        const d = new Date();
-        return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      function pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
       }
 
-      function renderTime() {
-        const t = nowHm();
-        document.getElementById("topTime").textContent = t;
-        document.getElementById("midTime").textContent = t;
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      function renderProfile(profile) {
-        const avatar = pick(targetAvatars);
-        const status = statusStyle[profile.status] || statusStyle["离线"];
-        const agePart = profile.age ? `${profile.gender}${profile.age}岁` : profile.gender;
-
-        document.getElementById("titleName").textContent = profile.name;
-        document.getElementById("cardName").textContent = profile.name;
-        document.getElementById("statusText").textContent = profile.status;
-        document.getElementById("statusDot").style.background = status.color;
-        document.getElementById("targetAvatar").src = avatar;
-
-        document.getElementById("cardMeta").textContent = `${agePart}  ${profile.city}`;
-        document.getElementById("signature").textContent = profile.birthday
-          ? `Ta [${profile.birthday}] 过生日~`
-          : "快来和我聊聊天吧～";
+      function pad(v) {
+        return String(v).padStart(2, "0");
       }
 
-      function renderMessage() {
-        document.getElementById("bubbleText").textContent = pick(chats);
+      function randomTime() {
+        return `${pad(randInt(15, 23))}:${pad(randInt(0, 59))}`;
       }
 
-      document.getElementById("randomProfileBtn").addEventListener("click", () => {
-        renderProfile(pick(profiles));
-        renderTime();
+      function randomProfile() {
+        const hasAge = Math.random() < 0.8;
+        const age = hasAge ? randInt(20, 35) : "";
+        const city = pick(cities);
+        const gender = pick(genders);
+        const birthday = Math.random() < 0.75 ? `${pad(randInt(1, 12))}-${pad(randInt(1, 28))}` : "";
+        return {
+          name: pick(names),
+          gender,
+          age,
+          city,
+          birthday,
+          status: pick(onlineStates),
+          message: pick(messages),
+          keepOriginalAvatar: Math.random() < 0.5,
+        };
+      }
+
+      function setStatus(message) {
+        statusText.textContent = message;
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + width, y, x + width, y + height, r);
+        ctx.arcTo(x + width, y + height, x, y + height, r);
+        ctx.arcTo(x, y + height, x, y, r);
+        ctx.arcTo(x, y, x + width, y, r);
+        ctx.closePath();
+      }
+
+      function wrapText(ctx, text, maxWidth) {
+        const lines = [];
+        let current = "";
+        for (const ch of text) {
+          const trial = current + ch;
+          if (ctx.measureText(trial).width <= maxWidth) {
+            current = trial;
+          } else {
+            lines.push(current);
+            current = ch;
+          }
+        }
+        if (current) {
+          lines.push(current);
+        }
+        return lines;
+      }
+
+      function drawRandomAvatar(ctx, cx, cy, r) {
+        const bgColors = ["#ff79a7", "#ff9f5e", "#5f97ff", "#64c794", "#9f7dff"];
+        const faceColors = ["#ffe4ca", "#f8d8b6", "#f2c89d", "#f9dcc4"];
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.clip();
+
+        ctx.fillStyle = pick(bgColors);
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+
+        ctx.fillStyle = pick(faceColors);
+        ctx.beginPath();
+        ctx.arc(cx, cy + r * 0.05, r * 0.58, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#1f2430";
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.22, cy - r * 0.07, r * 0.07, 0, Math.PI * 2);
+        ctx.arc(cx + r * 0.22, cy - r * 0.07, r * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#1f2430";
+        ctx.lineWidth = Math.max(1, r * 0.05);
+        ctx.beginPath();
+        ctx.arc(cx, cy + r * 0.12, r * 0.22, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawVariant(canvas, profile) {
+        if (!baseImage) {
+          return;
+        }
+        const ctx = canvas.getContext("2d");
+        canvas.width = baseImage.width;
+        canvas.height = baseImage.height;
+        const sx = baseImage.width / REF_WIDTH;
+        const sy = baseImage.height / REF_HEIGHT;
+        const X = (n) => n * sx;
+        const Y = (n) => n * sy;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
+
+        const now = randomTime();
+        const title = profile.name;
+        const stateColor = profile.status === "在线" ? "#32d365" : "#c4c9d2";
+        const meta = profile.age ? `${profile.gender}${profile.age}岁   ${profile.city}` : `${profile.gender}   ${profile.city}`;
+        const birthdayText = profile.birthday ? `Ta [${profile.birthday}] 过生日~` : "快来和我聊聊天吧～";
+
+        ctx.fillStyle = NAV_BG;
+        ctx.fillRect(X(72), Y(88), X(220), Y(36));
+        ctx.fillRect(X(78), Y(135), X(130), Y(22));
+        ctx.fillRect(X(96), Y(214), X(250), Y(30));
+        ctx.fillRect(X(95), Y(260), X(240), Y(28));
+        ctx.fillStyle = SCREEN_BG;
+        ctx.fillRect(X(194), Y(350), X(95), Y(34));
+        ctx.fillRect(X(126), Y(420), X(290), Y(98));
+
+        ctx.fillStyle = "#1b2234";
+        ctx.font = `${Math.round(24 * sx)}px "PingFang SC", sans-serif`;
+        ctx.textBaseline = "middle";
+        ctx.fillText(title, X(78), Y(106));
+
+        ctx.beginPath();
+        ctx.fillStyle = stateColor;
+        ctx.arc(X(85), Y(151), Math.max(2.5, X(4.6)), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#a5aab7";
+        ctx.font = `${Math.round(14 * sx)}px "PingFang SC", sans-serif`;
+        ctx.fillText(profile.status, X(98), Y(151));
+
+        ctx.fillStyle = "#2a2f3e";
+        ctx.font = `600 ${Math.round(16 * sx)}px "PingFang SC", sans-serif`;
+        ctx.fillText(title, X(100), Y(228));
+        ctx.fillStyle = "#5f6678";
+        ctx.font = `${Math.round(14 * sx)}px "PingFang SC", sans-serif`;
+        ctx.fillText(meta, X(212), Y(229));
+
+        ctx.fillStyle = "#7f8798";
+        ctx.font = `${Math.round(13 * sx)}px "PingFang SC", sans-serif`;
+        ctx.fillText(`○ ${birthdayText}`, X(100), Y(273));
+
+        ctx.fillStyle = "#acb3c2";
+        ctx.font = `${Math.round(18 * sx)}px "PingFang SC", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText(now, X(236), Y(367));
+        ctx.textAlign = "start";
+
+        ctx.fillStyle = BUBBLE_BG;
+        roundRect(ctx, X(132), Y(430), X(265), Y(102), X(14));
+        ctx.fill();
+
+        ctx.fillStyle = "#22252e";
+        ctx.font = `500 ${Math.round(22 * sx)}px "PingFang SC", sans-serif`;
+        ctx.textBaseline = "top";
+        const lines = wrapText(ctx, profile.message, X(228));
+        lines.slice(0, 2).forEach((line, idx) => {
+          ctx.fillText(line, X(146), Y(446 + idx * 30));
+        });
+
+        if (!profile.keepOriginalAvatar) {
+          drawRandomAvatar(ctx, X(64), Y(235), X(29));
+        }
+      }
+
+      function toBlob(canvas) {
+        return new Promise((resolve) => {
+          canvas.toBlob((blob) => resolve(blob), "image/png");
+        });
+      }
+
+      async function previewOne() {
+        if (!baseImage) {
+          setStatus("请先上传底图。");
+          return;
+        }
+        drawVariant(previewCanvas, randomProfile());
+        setStatus("已生成 1 张预览。");
+      }
+
+      async function exportBatch() {
+        if (!baseImage) {
+          setStatus("请先上传底图。");
+          return;
+        }
+        const count = Math.max(1, Math.min(50, Number(batchCountInput.value) || 1));
+        thumbs.innerHTML = "";
+        setStatus(`正在导出 ${count} 张...`);
+
+        for (let i = 0; i < count; i += 1) {
+          const canvas = document.createElement("canvas");
+          drawVariant(canvas, randomProfile());
+          const blob = await toBlob(canvas);
+          if (!blob) {
+            continue;
+          }
+          const url = URL.createObjectURL(blob);
+          const thumb = document.createElement("img");
+          thumb.src = url;
+          thumb.alt = `导出预览 ${i + 1}`;
+          thumbs.appendChild(thumb);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `chat-random-${String(i + 1).padStart(2, "0")}.png`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+        setStatus(`导出完成：${count} 张（头像 50% 保留原图，50% 随机）。`);
+      }
+
+      uploadInput.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          baseImage = img;
+          drawVariant(previewCanvas, randomProfile());
+          setStatus(`底图已加载：${img.width} x ${img.height}`);
+          URL.revokeObjectURL(url);
+        };
+        img.onerror = () => {
+          setStatus("底图加载失败，请换一张 PNG/JPG。");
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
       });
 
-      document.getElementById("randomAllBtn").addEventListener("click", () => {
-        renderProfile(pick(profiles));
-        renderMessage();
-        renderTime();
-      });
+      document.getElementById("previewBtn").addEventListener("click", previewOne);
+      document.getElementById("exportBtn").addEventListener("click", exportBatch);
 
-      renderProfile(pick(profiles));
-      renderMessage();
-      renderTime();
-      setInterval(renderTime, 20000);
+      previewCtx.fillStyle = "#11151f";
+      previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+      previewCtx.fillStyle = "#8d97b7";
+      previewCtx.font = "18px sans-serif";
+      previewCtx.fillText("请先在左侧上传你的截图底图", 40, 80);
     </script>
   </body>
 </html>
