@@ -262,9 +262,9 @@
       const genders = ["♂", "♀"];
       const messages = [
         "和小美聊完了也和小丑聊两句呗",
-        "和小美聊完了以后小丑聊两句呗",
-        "和小美聊完了，也和小丑聊两句呗",
-        "和小美聊完了和小丑聊两句呗",
+        "和小美聊完了也和小丑聊会儿呗",
+        "和小美聊完了也和小丑聊几句呗",
+        "和小美聊完了也和小丑再聊呗",
       ];
       const onlineStates = ["在线", "离线"];
 
@@ -444,7 +444,8 @@
               continue;
             }
             const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-            if (luminance > 30) {
+            // Focus on bright UI pixels (white + light gray screen), ignore dark backgrounds and blue debug borders.
+            if (luminance > 220) {
               if (x < minX) minX = x;
               if (y < minY) minY = y;
               if (x > maxX) maxX = x;
@@ -458,11 +459,41 @@
         }
 
         return {
-          x: Math.max(0, minX - 2),
-          y: Math.max(0, minY - 2),
-          w: Math.min(width - minX + 2, maxX - minX + 4),
-          h: Math.min(height - minY + 2, maxY - minY + 4),
+          x: Math.max(0, minX - 4),
+          y: Math.max(0, minY - 4),
+          w: Math.min(width - minX + 4, maxX - minX + 8),
+          h: Math.min(height - minY + 4, maxY - minY + 8),
         };
+      }
+
+      function hasDebugBorder(image) {
+        const c = document.createElement("canvas");
+        c.width = image.width;
+        c.height = image.height;
+        const t = c.getContext("2d");
+        t.drawImage(image, 0, 0);
+        const { data, width, height } = t.getImageData(0, 0, c.width, c.height);
+        let sampled = 0;
+        let blueLike = 0;
+        const check = (x, y) => {
+          const idx = (y * width + x) * 4;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          sampled += 1;
+          if (b > 150 && b - r > 40 && b - g > 20) {
+            blueLike += 1;
+          }
+        };
+        for (let x = 0; x < width; x += Math.max(1, Math.round(width / 120))) {
+          check(x, 0);
+          check(x, height - 1);
+        }
+        for (let y = 0; y < height; y += Math.max(1, Math.round(height / 160))) {
+          check(0, y);
+          check(width - 1, y);
+        }
+        return sampled > 0 && blueLike / sampled > 0.12;
       }
 
       function drawVariant(canvas, profile, options = {}) {
@@ -489,18 +520,21 @@
         const meta = profile.age ? `${profile.gender}${profile.age}岁   ${profile.city}` : `${profile.gender}   ${profile.city}`;
         const birthdayText = profile.birthday ? `Ta [${profile.birthday}] 过生日~` : "快来和我聊聊天吧～";
 
-        // 1) Strict text-only replacement regions (no full-card redraw) for pixel stability.
+        // 1) Strict replacement regions.
         ctx.fillStyle = NAV_BG;
         ctx.fillRect(X(22), Y(20), X(100) - X(22), Y(55) - Y(20)); // status time
-        ctx.fillRect(X(70), Y(84), X(258) - X(70), Y(164) - Y(84)); // title + online line
-        ctx.fillRect(X(98), Y(206), X(344) - X(98), Y(285) - Y(206)); // card text two lines
+        ctx.fillRect(X(72), Y(82), X(298) - X(72), Y(165) - Y(82)); // title + online line
+        ctx.fillRect(X(97), Y(206), X(356) - X(97), Y(286) - Y(206)); // card text two lines
 
         ctx.fillStyle = SCREEN_BG;
         ctx.fillRect(X(190), Y(349), X(286) - X(190), Y(381) - Y(349)); // middle time
 
-        // Keep original bubble shape; only rewrite inner text area.
+        // Always redraw one stable bubble to prevent stacked artifacts from dirty input screenshots.
+        ctx.fillStyle = SCREEN_BG;
+        ctx.fillRect(X(124), Y(414), X(402) - X(124), Y(510) - Y(414));
         ctx.fillStyle = BUBBLE_BG;
-        ctx.fillRect(X(166), Y(440), X(374) - X(166), Y(483) - Y(440));
+        roundRect(ctx, X(132), Y(431), X(397) - X(132), Y(490) - Y(431), S(14));
+        ctx.fill();
 
         // 2) Draw dynamic text.
         ctx.textBaseline = "middle";
@@ -540,13 +574,12 @@
         ctx.fillStyle = "#22252e";
         ctx.font = `500 ${Math.round(17 * S(1))}px "PingFang SC", sans-serif`;
         ctx.textBaseline = "middle";
-        const lines = wrapText(ctx, profile.message, X(372) - X(176));
-        if (lines.length > 1) {
-          ctx.fillText(lines[0], X(176), Y(454));
-          ctx.fillText(lines[1], X(176), Y(476));
-        } else {
-          ctx.fillText(lines[0] || "", X(176), Y(465));
+        const maxWidth = X(372) - X(176);
+        let msg = profile.message;
+        while (ctx.measureText(msg).width > maxWidth && msg.length > 0) {
+          msg = msg.slice(0, -1);
         }
+        ctx.fillText(msg, X(176), Y(461));
 
         if (!profile.keepOriginalAvatar) {
           drawRandomAvatar(ctx, X(64), Y(235), S(29));
@@ -635,8 +668,11 @@
           syncRectInputs(frameRect);
           currentProfile = randomProfile();
           redrawPreview();
+          const debugHint = hasDebugBorder(img)
+            ? "（检测到边缘可能是预览截图，请尽量上传最原始聊天截图）"
+            : "";
           setStatus(
-            `底图已加载：${img.width} x ${img.height}，识别区域 ${Math.round(frameRect.w)} x ${Math.round(frameRect.h)}`
+            `底图已加载：${img.width} x ${img.height}，识别区域 ${Math.round(frameRect.w)} x ${Math.round(frameRect.h)} ${debugHint}`
           );
           URL.revokeObjectURL(url);
         };
