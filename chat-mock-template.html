@@ -211,6 +211,7 @@
       const statusText = document.getElementById("statusText");
 
       let baseImage = null;
+      let frameRect = null;
 
       function pick(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
@@ -309,6 +310,51 @@
         ctx.restore();
       }
 
+      function detectPhoneFrame(image) {
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = image.width;
+        tempCanvas.height = image.height;
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCtx.drawImage(image, 0, 0);
+
+        const { data, width, height } = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        let minX = width;
+        let minY = height;
+        let maxX = -1;
+        let maxY = -1;
+
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const idx = (y * width + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            const a = data[idx + 3];
+            if (a < 10) {
+              continue;
+            }
+            const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            if (luminance > 30) {
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+
+        if (maxX <= minX || maxY <= minY) {
+          return { x: 0, y: 0, w: width, h: height };
+        }
+
+        return {
+          x: Math.max(0, minX - 2),
+          y: Math.max(0, minY - 2),
+          w: Math.min(width - minX + 2, maxX - minX + 4),
+          h: Math.min(height - minY + 2, maxY - minY + 4),
+        };
+      }
+
       function drawVariant(canvas, profile) {
         if (!baseImage) {
           return;
@@ -316,10 +362,12 @@
         const ctx = canvas.getContext("2d");
         canvas.width = baseImage.width;
         canvas.height = baseImage.height;
-        const sx = baseImage.width / REF_WIDTH;
-        const sy = baseImage.height / REF_HEIGHT;
-        const X = (n) => n * sx;
-        const Y = (n) => n * sy;
+        const rect = frameRect || { x: 0, y: 0, w: baseImage.width, h: baseImage.height };
+        const sx = rect.w / REF_WIDTH;
+        const sy = rect.h / REF_HEIGHT;
+        const S = (n) => n * Math.min(sx, sy);
+        const X = (n) => rect.x + n * sx;
+        const Y = (n) => rect.y + n * sy;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
@@ -330,23 +378,27 @@
         const meta = profile.age ? `${profile.gender}${profile.age}岁   ${profile.city}` : `${profile.gender}   ${profile.city}`;
         const birthdayText = profile.birthday ? `Ta [${profile.birthday}] 过生日~` : "快来和我聊聊天吧～";
 
+        // Clean target regions first to avoid ghosting/overlap on any base screenshot.
         ctx.fillStyle = NAV_BG;
-        ctx.fillRect(X(72), Y(88), X(220), Y(36));
-        ctx.fillRect(X(78), Y(135), X(130), Y(22));
-        ctx.fillRect(X(96), Y(214), X(250), Y(30));
-        ctx.fillRect(X(95), Y(260), X(240), Y(28));
+        ctx.fillRect(X(18), Y(20), X(95) - X(18), Y(52) - Y(20)); // top-left time
+        ctx.fillRect(X(68), Y(82), X(320) - X(68), Y(168) - Y(82)); // nav title + online status
+        ctx.fillRect(X(94), Y(206), X(350) - X(94), Y(286) - Y(206)); // profile text area
         ctx.fillStyle = SCREEN_BG;
-        ctx.fillRect(X(194), Y(350), X(95), Y(34));
-        ctx.fillRect(X(126), Y(420), X(290), Y(98));
+        ctx.fillRect(X(184), Y(346), X(292) - X(184), Y(382) - Y(346)); // middle time
+        ctx.fillRect(X(120), Y(414), X(438) - X(120), Y(546) - Y(414)); // message area
+
+        ctx.fillStyle = "#0f131b";
+        ctx.font = `600 ${Math.round(20 * sx)}px "PingFang SC", sans-serif`;
+        ctx.textBaseline = "middle";
+        ctx.fillText(now, X(27), Y(39));
 
         ctx.fillStyle = "#1b2234";
         ctx.font = `${Math.round(24 * sx)}px "PingFang SC", sans-serif`;
-        ctx.textBaseline = "middle";
         ctx.fillText(title, X(78), Y(106));
 
         ctx.beginPath();
         ctx.fillStyle = stateColor;
-        ctx.arc(X(85), Y(151), Math.max(2.5, X(4.6)), 0, Math.PI * 2);
+        ctx.arc(X(85), Y(151), Math.max(2.5, S(4.6)), 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#a5aab7";
         ctx.font = `${Math.round(14 * sx)}px "PingFang SC", sans-serif`;
@@ -370,19 +422,19 @@
         ctx.textAlign = "start";
 
         ctx.fillStyle = BUBBLE_BG;
-        roundRect(ctx, X(132), Y(430), X(265), Y(102), X(14));
+        roundRect(ctx, X(132), Y(430), X(397) - X(132), Y(532) - Y(430), S(14));
         ctx.fill();
 
         ctx.fillStyle = "#22252e";
         ctx.font = `500 ${Math.round(22 * sx)}px "PingFang SC", sans-serif`;
         ctx.textBaseline = "top";
-        const lines = wrapText(ctx, profile.message, X(228));
+        const lines = wrapText(ctx, profile.message, X(368) - X(146));
         lines.slice(0, 2).forEach((line, idx) => {
-          ctx.fillText(line, X(146), Y(446 + idx * 30));
+          ctx.fillText(line, X(146), Y(446 + idx * 32));
         });
 
         if (!profile.keepOriginalAvatar) {
-          drawRandomAvatar(ctx, X(64), Y(235), X(29));
+          drawRandomAvatar(ctx, X(64), Y(235), S(29));
         }
       }
 
@@ -442,8 +494,11 @@
         const img = new Image();
         img.onload = () => {
           baseImage = img;
+          frameRect = detectPhoneFrame(img);
           drawVariant(previewCanvas, randomProfile());
-          setStatus(`底图已加载：${img.width} x ${img.height}`);
+          setStatus(
+            `底图已加载：${img.width} x ${img.height}，识别区域 ${Math.round(frameRect.w)} x ${Math.round(frameRect.h)}`
+          );
           URL.revokeObjectURL(url);
         };
         img.onerror = () => {
